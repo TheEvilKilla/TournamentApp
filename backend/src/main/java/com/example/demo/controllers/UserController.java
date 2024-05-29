@@ -1,6 +1,7 @@
 package com.example.demo.controllers;
 
 import com.example.demo.dtos.UserDTO;
+import com.example.demo.responses.LoginResponse;
 import com.example.demo.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -40,8 +41,5 @@ public class UserController {
         return ResponseEntity.ok(userService.deleteUser(id));
     }
 
-    @PostMapping("/verifyUser")
-    public ResponseEntity<UserDTO> verifyUser(@RequestParam String email, @RequestParam String password) {
-        return ResponseEntity.ok(userService.verifyUser(email,password));
-    }
+
 }

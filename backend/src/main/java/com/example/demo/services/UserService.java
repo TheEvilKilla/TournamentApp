@@ -5,12 +5,15 @@ import com.example.demo.exceptions.ResourceNotFoundException;
 import com.example.demo.mappers.UserMapper;
 import com.example.demo.models.User;
 import com.example.demo.repositories.UserRepository;
+import com.example.demo.security.JwtService;
+import com.example.demo.responses.LoginResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UserService {
@@ -32,8 +35,11 @@ public class UserService {
     }
 
     public UserDTO  getUserById(Long id){
-        User user = util.getUser(id);
-        return userMapper.toDTO(user);
+//        User user = util.getUser(id);
+//        return userMapper.toDTO(user);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User currentUser = (User) authentication.getPrincipal();
+        return userMapper.toDTO(currentUser);
     }
 
     public UserDTO  createUser(UserDTO userDTO) {
@@ -61,20 +67,6 @@ public class UserService {
 
         User updatedUser = userRepository.save(existingUser);
         return userMapper.toDTO(updatedUser);
-    }
-
-    public UserDTO verifyUser(String email, String rawPassword) {
-        User user = userRepository.findByEmail(email);
-
-        if (user == null) {
-            throw new ResourceNotFoundException(User.class, Long.valueOf(0));
-        }
-
-        if (user != null && passwordEncoder.matches(rawPassword, user.getPassword())) {
-            return userMapper.toDTO(user);
-        }
-
-        return null;
     }
 
     public String deleteUser(Long id) {

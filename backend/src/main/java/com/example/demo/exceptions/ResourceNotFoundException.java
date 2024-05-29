@@ -14,4 +14,14 @@ public class ResourceNotFoundException extends RuntimeException{
                 .toString()
         );
     }
+
+    public ResourceNotFoundException(Class resourceName, String email) {
+        super(new StringBuilder("The resource ")
+                .append(resourceName.getName())
+                .append(" with Email: ")
+                .append(email)
+                .append(" don't exist")
+                .toString()
+        );
+    }
 }
