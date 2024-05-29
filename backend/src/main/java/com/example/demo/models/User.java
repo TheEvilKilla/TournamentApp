@@ -48,6 +48,11 @@ public class User implements UserDetails {
     )
     private Set<Tournament> tournaments = new HashSet<>();
 
+    public void removeTournament(Tournament tournament){
+        this.tournaments.remove(tournament);
+        tournament.getUsers().remove(this);
+    }
+
     @PrePersist
     public void prePersist() {
         if (this.role == null) {

@@ -34,4 +34,10 @@ public class Tournament {
 
     @ManyToMany(mappedBy = "tournaments")
     private Set<User> users = new HashSet<>();
+
+    @PreRemove
+    public void removeUsers(){
+        for(User user : this.users)
+            user.getTournaments().remove(this);
+    }
 }
