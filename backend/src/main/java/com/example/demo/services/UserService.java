@@ -10,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Iterator;
 import java.util.List;
@@ -34,11 +35,9 @@ public class UserService {
         return users.stream().map(userMapper::toDTO).toList();
     }
 
+    @Transactional
     public UserDTO  getUserById(Long id){
-//        User user = util.getUser(id);
-//        return userMapper.toDTO(user);
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User currentUser = (User) authentication.getPrincipal();
+        User currentUser = util.getUser(id);
         return userMapper.toDTO(currentUser);
     }
 
@@ -50,18 +49,27 @@ public class UserService {
         return userMapper.toDTO(savedUser);
     }
 
-    public UserDTO  updateUser(Long id, UserDTO dto) {
+    public UserDTO updateUser(Long id, UserDTO dto) {
         User existingUser = util.getUser(id);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User currentUser = (User) authentication.getPrincipal();
 
-        if (dto.getPassword() == null || dto.getPassword().isEmpty()) {
-            throw new IllegalArgumentException("Current password must be provided for verification");
-        }
+        boolean isAdmin = currentUser.getRole() == User.Role.ADMIN;
 
-        if (!passwordEncoder.matches(dto.getPassword(), existingUser.getPassword())) {
-            throw new IllegalArgumentException("Current password is incorrect");
+        if (!isAdmin) {
+            if (dto.getPassword() == null || dto.getPassword().isEmpty()) {
+                throw new IllegalArgumentException("Current password must be provided for verification");
+            }
+
+            if (!passwordEncoder.matches(dto.getPassword(), existingUser.getPassword())) {
+                throw new IllegalArgumentException("Current password is incorrect");
+            }
         }
 
         if (dto != null) {
+            if (dto.getNewPassword() != null && !dto.getNewPassword().isEmpty()) {
+                dto.setPassword(passwordEncoder.encode(dto.getNewPassword()));
+            }
             userMapper.updateEntity(existingUser, dto);
         }
 

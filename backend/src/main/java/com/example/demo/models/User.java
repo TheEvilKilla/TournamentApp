@@ -40,7 +40,7 @@ public class User implements UserDetails {
     private Role role;
 
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_tournaments",
             joinColumns = @JoinColumn(name = "user_id"),
